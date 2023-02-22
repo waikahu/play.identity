@@ -1,6 +1,9 @@
 using System;
+using System.IO;
+using System.Reflection;
 using GreenPipes;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,6 +41,7 @@ builder.Services.AddMassTransitWithRabbitMq(retryConfig =>
 });
 
 builder.Services.AddIdentityServer(opt => {
+        opt.KeyManagement.KeyPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         opt.Events.RaiseSuccessEvents = true;
         opt.Events.RaiseFailureEvents = true;
         opt.Events.RaiseErrorEvents = true;
@@ -72,15 +76,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 
 app.UseIdentityServer();
-
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax
+});
 
+app.MapControllers();
 app.MapRazorPages();
 
 app.Run();
