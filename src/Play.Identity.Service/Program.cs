@@ -1,28 +1,32 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Azure.Identity;
 using GreenPipes;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 using Play.Common.HealthChecks;
 using Play.Common.MassTransit;
 using Play.Common.Settings;
 using Play.Identity.Service.Entities;
 using Play.Identity.Service.Exceptions;
-using Play.Identity.Service.HealthChecks;
 using Play.Identity.Service.HostedServices;
 using Play.Identity.Service.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddAzureKeyVault(
+        new Uri("https://wbplayeconomy.vault.azure.net/"),
+        new DefaultAzureCredential());
+}
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 var serviceSettings = builder.Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
@@ -38,19 +42,20 @@ builder.Services.Configure<IdentitySettings>(builder.Configuration.GetSection(na
         serviceSettings.ServiceName
     );
 
-builder.Services.AddMassTransitWithMessageBroker(builder.Configuration, retryConfig => 
+builder.Services.AddMassTransitWithMessageBroker(builder.Configuration, retryConfig =>
 {
     retryConfig.Interval(3, TimeSpan.FromSeconds(5));
     retryConfig.Ignore(typeof(UnknownUserException));
     retryConfig.Ignore(typeof(InsufficientFundsException));
 });
 
-builder.Services.AddIdentityServer(opt => {
-        opt.KeyManagement.KeyPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-        opt.Events.RaiseSuccessEvents = true;
-        opt.Events.RaiseFailureEvents = true;
-        opt.Events.RaiseErrorEvents = true;
-    })
+builder.Services.AddIdentityServer(opt =>
+{
+    opt.KeyManagement.KeyPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+    opt.Events.RaiseSuccessEvents = true;
+    opt.Events.RaiseFailureEvents = true;
+    opt.Events.RaiseErrorEvents = true;
+})
     .AddAspNetIdentity<ApplicationUser>()
     .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
     .AddInMemoryApiResources(identityServerSettings.ApiResources)
@@ -74,7 +79,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    app.UseCors(opt => 
+    app.UseCors(opt =>
     {
         opt.WithOrigins(app.Configuration["AllowedOrigin"])
             .AllowAnyHeader()
