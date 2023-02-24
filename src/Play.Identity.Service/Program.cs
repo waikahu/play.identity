@@ -59,6 +59,7 @@ builder.Services.AddControllers();
 builder.Services.AddHostedService<IdentitySeedHostedService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -88,5 +89,6 @@ app.UseCookiePolicy(new CookiePolicyOptions
 
 app.MapControllers();
 app.MapRazorPages();
+app.MapHealthChecks("/health");
 
 app.Run();
