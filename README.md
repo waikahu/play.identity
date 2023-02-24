@@ -3,7 +3,7 @@ Play Economy Identity microservice
 
 ## Create and publish package
 ```powershell
-$version="1.0.4"
+$version="1.0.5"
 $owner="waikahu"
 $gh_pat="[PAT HERE]"
 
@@ -53,10 +53,10 @@ kubectl apply -f .\kubernetes\identity.yaml -n $namespace
 
 # to see list of pods
 kubectl get pods -n $namespace
-
+# to see list of services
+kubectl get services -n $namespace
 # to see the logs of pod
 kubectl logs <name of pod> -n $namespace
-
 # to see datailed pod
 kubectl describe pod <name of pod> -n $namespace
 ```
