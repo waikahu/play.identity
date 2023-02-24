@@ -33,3 +33,16 @@ docker run -it --rm -p 5002:5002 --name identity -e MongoDbSettings__ConnectionS
 az acr login --name $crname
 docker push "$crname.azurecr.io/play.identity:$version"
 ```
+
+## Create the Kubernetes namespace
+```powershell
+$namespace="identity"
+kubectl create namespace $namespace
+```
+
+## Create the Kubernetes secrets
+```powershell
+kubectl create secret generic identity-secrets --from-literal=cosmodb-connectionstring=$cosmosDbConnString --from-literal=servicebus-connectionstring=$serviceBusConnString --from-literal=admin-password=$adminPass -n $namespace
+
+kubectl get secrets -n $namespace
+```
