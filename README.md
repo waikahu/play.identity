@@ -16,8 +16,8 @@ dotnet nuget push ..\packages\Play.Identity.Contracts.$version.nupkg --api-key $
 ```powershell
 $env:GH_OWNER="waikahu"
 $env:GH_PAT="[PAT HERE]"
-$crname="wbplayeconomy"
-docker build --secret id=GH_OWNER --secret id=GH_PAT -t "$crname.azurecr.io/play.identity:$version" .
+$appname="wbplayeconomy"
+docker build --secret id=GH_OWNER --secret id=GH_PAT -t "$appname.azurecr.io/play.identity:$version" .
 ```
 
 ## Run the Docker image
@@ -30,21 +30,14 @@ docker run -it --rm -p 5002:5002 --name identity -e MongoDbSettings__ConnectionS
 
 ## Publishing the Docker image
 ```powershell
-az acr login --name $crname
-docker push "$crname.azurecr.io/play.identity:$version"
+az acr login --name $appname
+docker push "$appname.azurecr.io/play.identity:$version"
 ```
 
 ## Create the Kubernetes namespace
 ```powershell
 $namespace="identity"
 kubectl create namespace $namespace
-```
-
-## Create the Kubernetes secrets
-```powershell
-kubectl create secret generic identity-secrets --from-literal=cosmodb-connectionstring=$cosmosDbConnString --from-literal=servicebus-connectionstring=$serviceBusConnString --from-literal=admin-password=$adminPass -n $namespace
-
-kubectl get secrets -n $namespace
 ```
 
 ## Create the Kubernetes pod
@@ -59,11 +52,13 @@ kubectl get services -n $namespace
 kubectl logs <name of pod> -n $namespace
 # to see datailed pod
 kubectl describe pod <name of pod> -n $namespace
+
+kubectl rollout restart deployment identity-deployment -n identity
 ```
 
 ## Creating the Azure Managed Identity and granting it access to the Key Vault secrets
 ```powershell
-$appname="playeconomy"
+$appname="wbplayeconomy"
 az identity create --resource-group $appname --name $namespace
 $IDENTITY_CLIENT_ID=az identity show -g $appname -n $namespace --query clientId -otsv
 az keyvault set-policy -n $appname --secret-permissions get list --spn $IDENTITY_CLIENT_ID

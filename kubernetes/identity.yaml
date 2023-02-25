@@ -14,25 +14,11 @@ spec:
       serviceAccountName: identity-serviceaccount
       containers:
       - name: identity
-        image: wbplayeconomy.azurecr.io/play.identity:1.0.5
+        image: wbplayeconomy.azurecr.io/play.identity:1.0.6
+        imagePullPolicy: Always
         env:
           - name: ServiceSettings__MessageBroker
             value: SERVICEBUS
-          - name: MongoDbSettings__ConnectionString
-            valueFrom:
-              secretKeyRef:
-                name: identity-secrets
-                key: cosmodb-connectionstring
-          - name: ServiceBusSettings__ConnectionString
-            valueFrom:
-              secretKeyRef:
-                name: identity-secrets
-                key: servicebus-connectionstring
-          - name: IdentitySettings__AdminUserPassword
-            valueFrom:
-              secretKeyRef:
-                name: identity-secrets
-                key: admin-password
         resources:
           limits:
             memory: "128Mi"
@@ -48,7 +34,8 @@ spec:
           httpGet:
             path: /health/ready
             port: 5002
-          initialDelaySeconds: 10
+          initialDelaySeconds: 10          
+
 ---
 apiVersion: v1
 kind: Service
@@ -61,13 +48,13 @@ spec:
   ports:
   - port: 80
     targetPort: 5002
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: identity-serviceaccount
   annotations:
-    azure.workload.identity/client-id: 2a6d343d-9a4a-4bdc-8b5e-020f96b4b109
+    azure.workload.identity/client-id: 3a9b8ac0-6c1f-4b91-b320-254c3e761c1c
   labels:
     azure.workload.identity/use: "true"
-
