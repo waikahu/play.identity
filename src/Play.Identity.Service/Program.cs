@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using Play.Common.Configuration;
 using Play.Common.HealthChecks;
 using Play.Common.MassTransit;
 using Play.Common.Settings;
@@ -21,12 +22,7 @@ using Play.Identity.Service.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsProduction())
-{
-    builder.Configuration.AddAzureKeyVault(
-        new Uri("https://wbplayeconomy.vault.azure.net/"),
-        new DefaultAzureCredential());
-}
+builder.Host.ConfigureAzureKeyVault();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 var serviceSettings = builder.Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();

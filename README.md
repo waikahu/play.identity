@@ -3,7 +3,7 @@ Play Economy Identity microservice
 
 ## Create and publish package
 ```powershell
-$version="1.0.6"
+$version="1.0.7"
 $owner="waikahu"
 $gh_pat="[PAT HERE]"
 
@@ -25,7 +25,7 @@ docker build --secret id=GH_OWNER --secret id=GH_PAT -t "$appname.azurecr.io/pla
 $adminPass="[PASSWORD HERE]"
 $cosmosDbConnString="[Conn HERE]"
 $serviceBusConnString="[Conn HERE]"
-docker run -it --rm -p 5002:5002 --name identity -e MongoDbSettings__ConnectionString=$cosmosDbConnString -e ServiceBusSettings__ConnectionString=$serviceBusConnString -e ServiceSettings__MessageBroker="SERVICEBUS" -e IdentitySettings__AdminUserPassword=$adminPass play.identity:$version
+docker run -it --rm -p 5002:5002 --name identity -e MongoDbSettings__ConnectionString=$cosmosDbConnString -e ServiceBusSettings__ConnectionString=$serviceBusConnString -e ServiceSettings__MessageBroker="SERVICEBUS" -e ServiceSettings__KeyVaultName="wbplayeconomy" -e IdentitySettings__AdminUserPassword=$adminPass "$appname.azurecr.io/play.identity:$version"
 ```
 
 ## Publishing the Docker image
@@ -45,7 +45,7 @@ kubectl create namespace $namespace
 kubectl apply -f .\kubernetes\identity.yaml -n $namespace
 
 # to see list of pods
-kubectl get pods -n $namespace
+kubectl get pods -n $namespace -w
 # to see list of services
 kubectl get services -n $namespace
 # to see the logs of pod
@@ -53,7 +53,7 @@ kubectl logs <name of pod> -n $namespace
 # to see datailed pod
 kubectl describe pod <name of pod> -n $namespace
 
-kubectl rollout restart deployment identity-deployment -n identity
+kubectl rollout restart deployment $namespace-deployment -n $namespace
 ```
 
 ## Creating the Azure Managed Identity and granting it access to the Key Vault secrets
@@ -61,6 +61,7 @@ kubectl rollout restart deployment identity-deployment -n identity
 $appname="wbplayeconomy"
 az identity create --resource-group $appname --name $namespace
 $IDENTITY_CLIENT_ID=az identity show -g $appname -n $namespace --query clientId -otsv
+# i've to put the appid manually in the Azure Key Vault # 
 az keyvault set-policy -n $appname --secret-permissions get list --spn $IDENTITY_CLIENT_ID
 ```
 
