@@ -5,5 +5,6 @@ namespace Play.Identity.Service.Settings
         public string AdminUserEmail { get; init; }
         public string AdminUserPassword { get; init; }
         public decimal StartingGil { get; init; }
+        public string PathBase { get; set; }
     }
 }

@@ -14,13 +14,15 @@ spec:
       serviceAccountName: identity-serviceaccount
       containers:
       - name: identity
-        image: wbplayeconomy.azurecr.io/play.identity:1.0.7
+        image: wbplayeconomy.azurecr.io/play.identity:1.0.8
         imagePullPolicy: Always
         env:
           - name: ServiceSettings__MessageBroker
             value: SERVICEBUS
           - name: ServiceSettings__KeyVaultName
             value: wbplayeconomy
+          - name: IdentitySettings__PathBase
+            value: /identity-svc
         resources:
           limits:
             memory: "128Mi"
@@ -44,19 +46,9 @@ kind: Service
 metadata:
   name: identity-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: identity
   ports:
   - port: 80
     targetPort: 5002
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: identity-serviceaccount
-  annotations:
-    azure.workload.identity/client-id: 3a9b8ac0-6c1f-4b91-b320-254c3e761c1c
-  labels:
-    azure.workload.identity/use: "true"

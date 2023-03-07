@@ -84,6 +84,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.Use((context, next) => 
+{
+    var identitySettings = app.Configuration.GetSection(nameof(IdentitySettings)).Get<IdentitySettings>();
+    context.Request.PathBase = new PathString(identitySettings.PathBase);
+    return next();
+});
+
 app.UseStaticFiles();
 
 app.UseIdentityServer();
