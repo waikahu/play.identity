@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using GreenPipes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -27,7 +28,6 @@ builder.Host.ConfigureAzureKeyVault();
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 var serviceSettings = builder.Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
 var mongoDbSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
-var identityServerSettings = builder.Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
 
 builder.Services.Configure<IdentitySettings>(builder.Configuration.GetSection(nameof(IdentitySettings)))
     .AddDefaultIdentity<ApplicationUser>()
@@ -45,19 +45,7 @@ builder.Services.AddMassTransitWithMessageBroker(builder.Configuration, retryCon
     retryConfig.Ignore(typeof(InsufficientFundsException));
 });
 
-builder.Services.AddIdentityServer(opt =>
-{
-    opt.KeyManagement.KeyPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-    opt.Events.RaiseSuccessEvents = true;
-    opt.Events.RaiseFailureEvents = true;
-    opt.Events.RaiseErrorEvents = true;
-})
-    .AddAspNetIdentity<ApplicationUser>()
-    .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
-    .AddInMemoryApiResources(identityServerSettings.ApiResources)
-    .AddInMemoryClients(identityServerSettings.Clients)
-    .AddInMemoryIdentityResources(identityServerSettings.IdentityResources)
-    .AddDeveloperSigningCredential();
+AddIdentityServer(builder);
 
 builder.Services.AddLocalApiAuthentication();
 
@@ -116,3 +104,35 @@ app.MapRazorPages();
 app.MapPlayEconomyHealthChecks();
 
 app.Run();
+
+void AddIdentityServer(WebApplicationBuilder builder)
+{
+    var identityServerSettings = builder.Configuration.GetSection(nameof(IdentityServerSettings))
+        .Get<IdentityServerSettings>();
+
+    var generator = builder.Services.AddIdentityServer(opt =>
+    {
+        opt.Events.RaiseSuccessEvents = true;
+        opt.Events.RaiseFailureEvents = true;
+        opt.Events.RaiseErrorEvents = true;
+    })
+    .AddAspNetIdentity<ApplicationUser>()
+    .AddInMemoryApiScopes(identityServerSettings.ApiScopes)
+    .AddInMemoryApiResources(identityServerSettings.ApiResources)
+    .AddInMemoryClients(identityServerSettings.Clients)
+    .AddInMemoryIdentityResources(identityServerSettings.IdentityResources);
+
+    if (!builder.Environment.IsDevelopment())
+    {
+        var identitySettings = builder.Configuration.GetSection(nameof(IdentitySettings))
+            .Get<IdentitySettings>();
+        
+        var cer = X509Certificate2.CreateFromPemFile
+        (
+            identitySettings.CertificateCerFilePath,
+            identitySettings.CertificateKeyFilePath
+        );
+
+        generator.AddSigningCredential(cer);
+    }
+}
