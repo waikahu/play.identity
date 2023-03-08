@@ -14,7 +14,7 @@ spec:
       serviceAccountName: identity-serviceaccount
       containers:
       - name: identity
-        image: wbplayeconomy.azurecr.io/play.identity:1.0.8
+        image: wbplayeconomy.azurecr.io/play.identity:1.0.9
         imagePullPolicy: Always
         env:
           - name: ServiceSettings__MessageBroker

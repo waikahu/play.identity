@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Azure.Identity;
 using GreenPipes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -68,7 +68,16 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHealthChecks().AddMongoDb();
 
+builder.Services.Configure<ForwardedHeadersOptions>(opt => 
+{
+    opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    opt.KnownNetworks.Clear();
+    opt.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 if (app.Environment.IsDevelopment())
 {
