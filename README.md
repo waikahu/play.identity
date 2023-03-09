@@ -80,5 +80,17 @@ kubectl apply -f .\kubernetes\signing-cert.yaml -n $namespace
 ## Install the Helm Chart
 ```powershell
 $namespace="identity"
-helm install identity-service .\helm -f .\helm\values.yaml -n $namespace
+$appname="wbplayeconomy"
+
+$helmUser=[guid]::Empty.Guid
+$helmPassword=az acr login --name $appname --expose-token --output tsv --query accessToken
+
+helm registry login "$appname.azurecr.io" --username $helmUser --password $helmPassword
+
+$chartVersion="0.1.0"
+helm install identity-service oci://$appname.azurecr.io/helm/microservice --version $chartVersion -f .\helm\values.yaml -n $namespace
+#or Upgrade
+helm upgrade identity-service oci://$appname.azurecr.io/helm/microservice --version $chartVersion -f .\helm\values.yaml -n $namespace
+
+helm repo update
 ```
