@@ -94,3 +94,6 @@ helm upgrade identity-service oci://$appname.azurecr.io/helm/microservice --vers
 
 helm repo update
 ```
+
+## Required repository secrets for GitHub workflow
+GH_PAT: Created in GitHub user profile
