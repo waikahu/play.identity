@@ -67,8 +67,6 @@ jobs:
     - name: Azure Login
       uses: Azure/login@v1.4.6
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        # ClientId of the Azure Service principal created.
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         # TenantId of the Azure Service principal created.
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
