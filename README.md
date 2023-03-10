@@ -97,3 +97,12 @@ helm repo update
 
 ## Required repository secrets for GitHub workflow
 GH_PAT: Created in GitHub user profile
+
+```powershell
+# Need to create in github repo secrets
+AZURE_CLIENT_ID
+AZURE_TENANT_ID
+AZURE_SUBSCRIPTION_ID
+
+# https://dev.to/pwd9000/bk-1iij for reference
+```
