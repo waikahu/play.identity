@@ -3,7 +3,7 @@ Play Economy Identity microservice
 
 ## Create and publish package
 ```powershell
-$version="1.1.1"
+$version="1.0.10"
 $owner="waikahu"
 $gh_pat="[PAT HERE]"
 
