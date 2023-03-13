@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -86,10 +84,6 @@ namespace Play.Identity.Service
                 options.KnownNetworks.Clear();
                 options.KnownProxies.Clear();
             });
-
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            
-            IdentityModelEventSource.ShowPII = true;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
