@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Play.Identity.Contracts;
+using Play.Identity.Service.Dtos;
 using Play.Identity.Service.Entities;
 using static Duende.IdentityServer.IdentityServerConstants;
 
@@ -17,19 +18,19 @@ namespace Play.Identity.Service.Controllers
     [Authorize(Policy = LocalApi.PolicyName, Roles = Roles.Admin)]
     public class UsersController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IPublishEndpoint publishEndpoint;
 
         public UsersController(UserManager<ApplicationUser> userManager, IPublishEndpoint publishEndpoint)
         {
-            _userManager = userManager;
-            _publishEndpoint = publishEndpoint;
+            this.userManager = userManager;
+            this.publishEndpoint = publishEndpoint;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<UserDto>> Get()
         {
-            var users = _userManager.Users
+            var users = userManager.Users
                 .ToList()
                 .Select(user => user.AsDto());
 
@@ -40,7 +41,7 @@ namespace Play.Identity.Service.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetByIdAsync(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
+            var user = await userManager.FindByIdAsync(id.ToString());
 
             if (user == null)
             {
@@ -54,7 +55,7 @@ namespace Play.Identity.Service.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(Guid id, UpdateUserDto userDto)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
+            var user = await userManager.FindByIdAsync(id.ToString());
 
             if (user == null)
             {
@@ -65,9 +66,9 @@ namespace Play.Identity.Service.Controllers
             user.UserName = userDto.Email;
             user.Gil = userDto.Gil;
 
-            await _userManager.UpdateAsync(user);
+            await userManager.UpdateAsync(user);
 
-            await _publishEndpoint.Publish(new UserUpdated(user.Id, user.Email, user.Gil));
+            await publishEndpoint.Publish(new UserUpdated(user.Id, user.Email, user.Gil));
 
             return NoContent();
         }
@@ -76,16 +77,16 @@ namespace Play.Identity.Service.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
+            var user = await userManager.FindByIdAsync(id.ToString());
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            await _userManager.DeleteAsync(user);
+            await userManager.DeleteAsync(user);
 
-            await _publishEndpoint.Publish(new UserUpdated(user.Id, user.Email, 0));
+            await publishEndpoint.Publish(new UserUpdated(user.Id, user.Email, 0));
 
             return NoContent();
         }

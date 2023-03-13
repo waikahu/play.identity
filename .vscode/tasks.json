@@ -36,8 +36,9 @@
             "args": [
                 "watch",
                 "run",
-                "--project",
-                "${workspaceFolder}/src/Play.Identity.Service/Play.Identity.Service.csproj"
+                "${workspaceFolder}/src/Play.Identity.Service/Play.Identity.Service.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },

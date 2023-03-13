@@ -2,25 +2,20 @@ microserviceName: "identity"
 
 image:
   repository: wbplayeconomy.azurecr.io/play.identity
-  tag: 1.0.10
+  tag: 1.0.11
 
 envVariables:
   IdentitySettings__PathBase: /identity-svc
   IdentitySettings__CertificateCerFilePath: "/certificates/certificate.crt"
-  IdentitySettings__CertificateKeyFilePath: "/certificates/certificate.key"
+  IdentitySettings__CertificateKeyFilePath: "/certificates/certificate.key"  
   IdentityServerSettings__Clients__0__RedirectUris__0: https://wbplayeconomy.eastus.cloudapp.azure.com/authentication/login-callback
   IdentityServerSettings__Clients__0__PostLogoutRedirectUris__0: https://wbplayeconomy.eastus.cloudapp.azure.com/authentication/logout-callback
-
-resources:
-  limits:
-    memory: "256Mi"
-    cpu: "300m"
 
 container:
   port: 5002
   volumeMounts:
     - name: certificate-volume
-      mountPath: /certificates
+      mountPath: /certificates    
 
 volumes:
   - name: certificate-volume

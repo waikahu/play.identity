@@ -1,8 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,27 +12,29 @@ using Play.Identity.Service.Entities;
 
 namespace Play.Identity.Service.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class LogoutModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LogoutModel> _logger;
-        private readonly IIdentityServerInteractionService _interaction;
+        private readonly IIdentityServerInteractionService interaction;
 
-        public LogoutModel(SignInManager<ApplicationUser> signInManager, 
-            ILogger<LogoutModel> logger, 
+        public LogoutModel(
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<LogoutModel> logger,
             IIdentityServerInteractionService interaction)
         {
             _signInManager = signInManager;
             _logger = logger;
-            _interaction = interaction;
+            this.interaction = interaction;
         }
 
         public async Task<IActionResult> OnGet(string logoutId)
         {
-            var context = await _interaction.GetLogoutContextAsync(logoutId);
-            if (context.ShowSignoutPrompt == false)
+            var context = await interaction.GetLogoutContextAsync(logoutId);
+            if (context?.ShowSignoutPrompt == false)
             {
-                return await OnPost(context.PostLogoutRedirectUri);
+                return await this.OnPost(context.PostLogoutRedirectUri);
             }
 
             return Page();
@@ -43,9 +43,7 @@ namespace Play.Identity.Service.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-
             _logger.LogInformation("User logged out.");
-
             if (returnUrl != null)
             {
                 return Redirect(returnUrl);

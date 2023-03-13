@@ -8,19 +8,21 @@ namespace Play.Identity.Service.HealthChecks
 {
     public class MongoDbHealthCheck : IHealthCheck
     {
-        private readonly MongoClient _client;
+        private readonly MongoClient client;
 
         public MongoDbHealthCheck(MongoClient client)
         {
-            _client = client;
+            this.client = client;
         }
 
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        public async Task<HealthCheckResult> CheckHealthAsync(
+            HealthCheckContext context, 
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                await _client.ListDatabaseNamesAsync(cancellationToken);
-                return HealthCheckResult.Healthy();
+                 await client.ListDatabaseNamesAsync(cancellationToken);
+                 return HealthCheckResult.Healthy();
             }
             catch (Exception ex)
             {

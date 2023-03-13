@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -40,16 +39,12 @@ namespace Play.Identity.Service.HostedServices
                 adminUser = new ApplicationUser
                 {
                     UserName = settings.AdminUserEmail,
-                    Email = settings.AdminUserEmail,
-                    SecurityStamp = Guid.NewGuid().ToString("D"),
-                    ConcurrencyStamp = Guid.NewGuid().ToString("D")
+                    Email = settings.AdminUserEmail
                 };
 
                 await userManager.CreateAsync(adminUser, settings.AdminUserPassword);
                 await userManager.AddToRoleAsync(adminUser, Roles.Admin);
             }
-
-            await userManager.AddToRoleAsync(adminUser, Roles.Admin);
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -63,7 +58,7 @@ namespace Play.Identity.Service.HostedServices
 
             if (!roleExists)
             {
-                await roleManager.CreateAsync(new ApplicationRole { Name = role, ConcurrencyStamp = Guid.NewGuid().ToString("D") });
+                await roleManager.CreateAsync(new ApplicationRole { Name = role });
             }
         }
     }
